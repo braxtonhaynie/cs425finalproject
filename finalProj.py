@@ -20,7 +20,7 @@ from PIL import ImageFile
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-
+maxImages = 5
 
 imsize = (500, 500)
 train_dir = 'DATASET/TRAIN'
@@ -59,6 +59,9 @@ def read_images(dir):
         for pixel in range(len(binary[row])):
           nb.append(1 if binary[row][pixel] is True else 0)
       X.append(nb)
+      i += 1
+      if i == maxImages:
+        break
   return X, y
     
 
