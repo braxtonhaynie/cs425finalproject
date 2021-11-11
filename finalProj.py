@@ -3,15 +3,18 @@ from typing import NoReturn
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import ImageGrid
-from skimage import io
-from skimage import filters
-from skimage import restoration
+from numpy.core.fromnumeric import resize, shape
 import pandas as pd
 import skimage
 import os
+from skimage import io
+from skimage import filters
+from skimage import restoration
+from skimage.transform import resize
 
 
 
+imsize = (250, 250)
 train_dir = 'DATASET/TRAIN'
 test_dir = 'DATASET/TEST'
 
@@ -27,11 +30,12 @@ for pose in os.listdir(train_dir):
   for image in os.listdir(currdir):
     trainposes.append(pose) #Appends the pose to keep the same order as the images
     im = io.imread(train_dir + '/' + pose + '/' + image)
+    im = resize(im, imsize)
     grayIm = skimage.color.rgb2gray(im)
     # trainim.append(im)
     yenned = filters.threshold_yen(grayIm)
     binary = grayIm > yenned
-    newimage = np.ndarray(shape = (binary.shape[0], binary.shape[1], 3), dtype = np.uint8)
+    newimage = np.ndarray(shape = (binary.shape[0], binary.shape[1], 3))
     nb = []
     for row in range(len(binary)):
       # nb = nb.join(binary[row])
@@ -60,10 +64,12 @@ for pose in os.listdir(test_dir):
   for image in os.listdir(currdir):
     testposes.append(pose)
     im = io.imread(train_dir + '/' + pose + '/' + image)
+    im = resize(im, imsize)
+
     grayIm = skimage.color.rgb2gray(im)
     yenned = filters.threshold_yen(grayIm)
     binary = grayIm > yenned
-    newimage = np.ndarray(shape=(binary.shape[0], binary.shape[1], 3), dtype=np.uint8)
+    newimage = np.ndarray(shape=(binary.shape[0], binary.shape[1], 3))
     nb = []
     for row in range(len(binary)):
       # nb = nb.join(binary[row])
@@ -96,7 +102,12 @@ for pose in os.listdir(test_dir):
 from sklearn.neural_network import MLPClassifier
 
 net = MLPClassifier()
-print(trainim[1])
+print(np.shape(trainim))
+print(np.shape(trainim[0]))
+trainim = np.matrix(trainim, dtype=np.int8)
+trainposes = np.array(trainposes)
+testim = np.matrix(testim, dtype=np.int8)
+print(trainim)
 print(trainposes)
 net.fit(trainim, trainposes)
 ypred = net.predict(testim)
